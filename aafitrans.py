@@ -31,6 +31,10 @@ Beroiz, M., Cabral, J. B., & Sanchez, B.
 Astronomy & Computing, Volume 32, July 2020, 100384.
 '''
 
+''' 
+Modified by Prajwel Joseph
+'''
+
 import numpy as np
 from scipy.spatial import KDTree
 from itertools import combinations
@@ -251,26 +255,10 @@ def find_transform(source, target, max_control_points=50,
     triangle_inliers = matches[inlier_ind]
     d1, d2, d3 = triangle_inliers.shape
     inl_arr = triangle_inliers.reshape(d1 * d2, d3)
-    inl_unique = set(tuple(pair) for pair in inl_arr)
-    # In the next, multiple assignements to the same source point s are removed
-    # We keep the pair (s, t) with the lowest reprojection error.
-    inl_dict = {}
-    for s_i, t_i in inl_unique:
-        # calculate error
-        s_vertex = source_controlp[s_i]
-        t_vertex = target_controlp[t_i]
-        t_vertex_pred = transform.matrix_transform(s_vertex, best_t.params)
-        error = np.linalg.norm(t_vertex_pred - t_vertex)
+    inl_arr_unique = np.unique(inl_arr, axis=0)
+    s, t = inl_arr_unique.T
 
-        # if s_i not in dict, or if its error is smaller than previous error
-        if s_i not in inl_dict or (error < inl_dict[s_i][1]):
-            inl_dict[s_i] = (t_i, error)
-    inl_arr_unique = np.array(
-        [[s_i, t_i] for s_i, (t_i, e) in inl_dict.items()]
-    )
-    s, d = inl_arr_unique.T
-
-    return best_t, (source_controlp[s], target_controlp[d])
+    return best_t, (source_controlp[s], target_controlp[t])
 
 # Copyright (c) 2004-2007, Andrew D. Straw. All rights reserved.
 
