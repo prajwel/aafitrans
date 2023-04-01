@@ -361,7 +361,6 @@ def _ransac(data, model, thresh, min_matches, seed = None):
         better_data = data[better_inlier_idxs]
         better_fit = model.fit(better_data)
         if np.all((previous_fit == better_fit.params)):
-            print('converged at = {}'.format(i))
             break
         previous_fit = better_fit.params
 
