@@ -22,6 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+''' 
+Modified by Prajwel Joseph
+'''
+
 '''
 The following paper should be cited if you use the script in a scientific
 publication
@@ -31,9 +35,6 @@ Beroiz, M., Cabral, J. B., & Sanchez, B.
 Astronomy & Computing, Volume 32, July 2020, 100384.
 '''
 
-''' 
-Modified by Prajwel Joseph
-'''
 
 import numpy as np
 from scipy.spatial import KDTree
@@ -44,11 +45,12 @@ from skimage import transform
 
 
 class _MatchTransform:
-    def __init__(self, source, target):
+    def __init__(self, source, target, ttype):
         self.source = source
         self.target = target
+        self.ttype = ttype
 
-    def fit(self, data, ttype):
+    def fit(self, data):
         """
         Return the best 2D similarity transform from the points given in data.
 
@@ -60,7 +62,7 @@ class _MatchTransform:
         d1, d2, d3 = data.shape
         s, d = data.reshape(d1 * d2, d3).T
         approx_t = transform.estimate_transform(
-            ttype, self.source[s], self.target[d]
+            self.ttype, self.source[s], self.target[d]
         )
         return approx_t
 
@@ -162,7 +164,8 @@ def find_transform(source, target, max_control_points=50,
                    ttype='similarity', 
                    PIXEL_TOL=2, 
                    MIN_MATCHES=10, 
-                   NUM_NEAREST_NEIGHBORS=5):
+                   NUM_NEAREST_NEIGHBORS=5,
+                   seed = None):
     """Estimate the transform between ``source`` and ``target``.
 
     Return a GeometricTransform object ``T`` that maps pixel x, y indices from
@@ -239,18 +242,20 @@ def find_transform(source, target, max_control_points=50,
             matches.append(list(zip(t1, t2)))
     matches = np.array(matches)
 
-    inv_model = _MatchTransform(source_controlp, target_controlp)
+    inv_model = _MatchTransform(source_controlp, target_controlp, ttype)
     n_invariants = len(matches)
     # Set the minimum matches to be between 1 and 10 asterisms
-    min_matches = max(1, min(10, int(MIN_MATCHES)))
+    # min_matches = max(1, min(10, int(MIN_MATCHES)))
+    min_matches = MIN_MATCHES
+
     if (len(source_controlp) == 3 or len(target_controlp) == 3) and len(
         matches
     ) == 1:
-        best_t = inv_model.fit(matches, ttype)
+        best_t = inv_model.fit(matches)
         inlier_ind = np.arange(len(matches))  # All of the indices
     else:
         best_t, inlier_ind = _ransac(
-            matches, inv_model, ttype, PIXEL_TOL, min_matches
+            matches, inv_model, PIXEL_TOL, min_matches, seed
         )
     triangle_inliers = matches[inlier_ind]
     d1, d2, d3 = triangle_inliers.shape
@@ -292,6 +297,7 @@ def find_transform(source, target, max_control_points=50,
 #
 #
 # Modified by Martin Beroiz
+# Modified by Prajwel Joseph
 
 
 class MaxIterError(RuntimeError):
@@ -299,7 +305,7 @@ class MaxIterError(RuntimeError):
     pass
 
 
-def _ransac(data, model, ttype, thresh, min_matches):
+def _ransac(data, model, thresh, min_matches, seed = None):
     """Fit model parameters to data using the RANSAC algorithm.
 
     This implementation written from pseudocode found at
@@ -320,7 +326,8 @@ def _ransac(data, model, ttype, thresh, min_matches):
     good_fit = None
     n_data = data.shape[0]
     all_idxs = np.arange(n_data)
-    np.random.shuffle(all_idxs)
+    rng = np.random.default_rng(seed)
+    rng.shuffle(all_idxs)
 
     for iter_i in range(n_data):
         # Partition indices into two random subsets
@@ -330,14 +337,14 @@ def _ransac(data, model, ttype, thresh, min_matches):
         test_idxs = np.array(test_idxs, dtype="i8")
         maybeinliers = data[maybe_idxs, :]
         test_points = data[test_idxs, :]
-        maybemodel = model.fit(maybeinliers, ttype)
+        maybemodel = model.fit(maybeinliers)
         test_err = model.get_error(test_points, maybemodel)
         # select indices of rows with accepted points
         also_idxs = test_idxs[test_err < thresh]
         alsoinliers = data[also_idxs, :]
         if len(alsoinliers) >= min_matches:
             good_data = np.concatenate((maybeinliers, alsoinliers))
-            good_fit = model.fit(good_data, ttype)
+            good_fit = model.fit(good_data)
             break
 
     if good_fit is None:
@@ -347,11 +354,17 @@ def _ransac(data, model, ttype, thresh, min_matches):
         )
 
     better_fit = good_fit
+    previous_fit = np.ones([3,3])
     for i in range(100):
         test_err = model.get_error(data, better_fit)
         better_inlier_idxs = np.arange(n_data)[test_err < thresh]
         better_data = data[better_inlier_idxs]
-        better_fit = model.fit(better_data, ttype)
+        better_fit = model.fit(better_data)
+        if np.all((previous_fit == better_fit.params)):
+            print('converged at = {}'.format(i))
+            break
+        previous_fit = better_fit.params
+
     best_fit = better_fit
     best_inlier_idxs = better_inlier_idxs
     return best_fit, best_inlier_idxs
