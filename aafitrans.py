@@ -118,7 +118,7 @@ def _arrangetriplet(sources, vertex_indices):
     return np.array([a, b, c])
 
 
-def _generate_invariants(sources, NUM_NEAREST_NEIGHBORS):
+def _generate_invariants(sources, num_nearest_neighbors):
     """Return an array of (unique) invariants derived from the array `sources`.
 
     Return an array of the indices of `sources` that correspond to each
@@ -132,7 +132,7 @@ def _generate_invariants(sources, NUM_NEAREST_NEIGHBORS):
     triang_vrtx = []
     coordtree = KDTree(sources)
     # The number of nearest neighbors to request (to work with few sources)
-    knn = min(len(sources), NUM_NEAREST_NEIGHBORS)
+    knn = min(len(sources), num_nearest_neighbors)
     for asrc in sources:
         __, indx = coordtree.query(asrc, knn)
 
@@ -160,11 +160,13 @@ def _generate_invariants(sources, NUM_NEAREST_NEIGHBORS):
     return inv_uniq, triang_vrtx_uniq
 
 
-def find_transform(source, target, max_control_points=50, 
+def find_transform(source, target, 
+                   max_control_points=50, 
                    ttype='similarity', 
-                   PIXEL_TOL=2, 
-                   MIN_MATCHES=10, 
-                   NUM_NEAREST_NEIGHBORS=5,
+                   pixel_tolerance=2, 
+                   min_matches=10, 
+                   num_nearest_neighbors=10,
+                   kdtree_search_radius = 0.001,
                    seed = None):
     """Estimate the transform between ``source`` and ``target``.
 
@@ -215,10 +217,10 @@ def find_transform(source, target, max_control_points=50,
             "minimum value (3)."
         )
 
-    source_invariants, source_asterisms = _generate_invariants(source_controlp, NUM_NEAREST_NEIGHBORS)
+    source_invariants, source_asterisms = _generate_invariants(source_controlp, num_nearest_neighbors)
     source_invariant_tree = KDTree(source_invariants)
 
-    target_invariants, target_asterisms = _generate_invariants(target_controlp, NUM_NEAREST_NEIGHBORS)
+    target_invariants, target_asterisms = _generate_invariants(target_controlp, num_nearest_neighbors)
     target_invariant_tree = KDTree(target_invariants)
 
     # r = 0.1 is the maximum search distance, 0.1 is an empirical value that
@@ -227,7 +229,7 @@ def find_transform(source, target, max_control_points=50,
     # source_invariant_tree.data[i], matches_list[i] is a list of the indices
     # of its neighbors in target_invariant_tree.data
     matches_list = source_invariant_tree.query_ball_tree(
-        target_invariant_tree, r=0.1
+        target_invariant_tree, r=kdtree_search_radius
     )
 
     # matches unravels the previous list of matches into pairs of source and
@@ -245,8 +247,7 @@ def find_transform(source, target, max_control_points=50,
     inv_model = _MatchTransform(source_controlp, target_controlp, ttype)
     n_invariants = len(matches)
     # Set the minimum matches to be between 1 and 10 asterisms
-    # min_matches = max(1, min(10, int(MIN_MATCHES)))
-    min_matches = MIN_MATCHES
+    # min_matches = max(1, min(10, int(min_matches)))
 
     if (len(source_controlp) == 3 or len(target_controlp) == 3) and len(
         matches
@@ -255,7 +256,7 @@ def find_transform(source, target, max_control_points=50,
         inlier_ind = np.arange(len(matches))  # All of the indices
     else:
         best_t, inlier_ind = _ransac(
-            matches, inv_model, PIXEL_TOL, min_matches, seed
+            matches, inv_model, pixel_tolerance, min_matches, seed
         )
     triangle_inliers = matches[inlier_ind]
     d1, d2, d3 = triangle_inliers.shape
