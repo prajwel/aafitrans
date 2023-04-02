@@ -1,4 +1,4 @@
-# Aafitrans: A Modified Version of the Astroalign Package's `find_transform` Function
+# Aafitrans (AstroAlign FInd TRANSform)
 
 Aafitrans is a Python package that provides a modified version of the `find_transform` function from the Astroalign package. The modifications made to the function are as follows:
 
