@@ -20,9 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
 
-''' 
 Modified by Prajwel Joseph
 '''
 
@@ -182,7 +180,22 @@ def find_transform(source, target,
             An iterable of (x, y) coordinates of the target control points.
         max_control_points
             The maximum number of control point-sources to find the transformation.
-
+        ttype
+            The type of Transform to be estimated.
+        pixel_tolerance
+            The maximum residual error for the estimated tranform.            
+        min_matches
+            The minimum number of matches to be found.
+        num_nearest_neighbors
+            The number of nearest neighbors of a given star (including itself) 
+            to construct the triangle invariants.                      
+        kdtree_search_radius
+            The default is 0.001. I recommend to keep it 10 times the 
+            (pixel_tolerance / image size). For example, if your tolerance is 2 
+            image size is 1024, keep the value as (10 * 2 / 1024).  
+        seed
+            Seed value for Numpy Random Generator.       
+            
     Returns
     -------
         T, (source_pos_array, target_pos_array)
@@ -319,6 +332,7 @@ def _ransac(data, model, thresh, min_matches, seed = None):
         thresh: a threshold value to determine when a data point fits a model
         min_matches: the min number of matches required to assert that a model
             fits well to data
+        seed:     
     Returns
     -------
         bestfit: model parameters which best fit the data (or nil if no good
