@@ -42,7 +42,7 @@ from collections import Counter
 from skimage import transform
 
 
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 
 class _MatchTransform:
     def __init__(self, source, target, ttype):
@@ -167,6 +167,7 @@ def find_transform(source, target,
                    min_matches=10, 
                    num_nearest_neighbors=10,
                    kdtree_search_radius = 0.001,
+                   n_samples = 1,
                    seed = None):
     """Estimate the transform between ``source`` and ``target``.
 
@@ -195,6 +196,8 @@ def find_transform(source, target,
             The default is 0.001. I recommend to keep it 10 times the 
             (pixel_tolerance / image size). For example, if your tolerance is 2 
             image size is 1024, keep the value as (10 * 2 / 1024).  
+        n_samples
+            The minimum number of data points to fit the model to.            
         seed
             Seed value for Numpy Random Generator.       
             
@@ -260,7 +263,6 @@ def find_transform(source, target,
     matches = np.array(matches)
 
     inv_model = _MatchTransform(source_controlp, target_controlp, ttype)
-    n_invariants = len(matches)
     # Set the minimum matches to be between 1 and 10 asterisms
     # min_matches = max(1, min(10, int(min_matches)))
 
@@ -270,9 +272,13 @@ def find_transform(source, target,
         best_t = inv_model.fit(matches)
         inlier_ind = np.arange(len(matches))  # All of the indices
     else:
-        best_t, inlier_ind = _ransac(
-            matches, inv_model, pixel_tolerance, min_matches, seed
-        )
+        best_t, inlier_ind = _ransac(matches, 
+                                     inv_model, 
+                                     pixel_tolerance, 
+                                     min_matches, 
+                                     n_samples, 
+                                     seed)
+        
     triangle_inliers = matches[inlier_ind]
     d1, d2, d3 = triangle_inliers.shape
     inl_arr = triangle_inliers.reshape(d1 * d2, d3)
@@ -321,7 +327,7 @@ class MaxIterError(RuntimeError):
     pass
 
 
-def _ransac(data, model, thresh, min_matches, seed = None):
+def _ransac(data, model, thresh, min_matches, n_samples = 1, seed = None):
     """Fit model parameters to data using the RANSAC algorithm.
 
     This implementation written from pseudocode found at
@@ -329,12 +335,19 @@ def _ransac(data, model, thresh, min_matches, seed = None):
 
     Parameters
     ----------
-        data: a set of data points
-        model: a model that can be fitted to data points
-        thresh: a threshold value to determine when a data point fits a model
-        min_matches: the min number of matches required to assert that a model
+        data
+            A set of data points
+        model
+            A model that can be fitted to data points
+        thresh
+            A threshold value to determine when a data point fits a model
+        min_matches
+            The min number of matches required to assert that a model
             fits well to data
-        seed:     
+        n_samples
+            The minimum number of data points to fit the model to.
+        seed
+            Seed value for Numpy Random Generator.     
     Returns
     -------
         bestfit: model parameters which best fit the data (or nil if no good
@@ -348,10 +361,9 @@ def _ransac(data, model, thresh, min_matches, seed = None):
 
     for iter_i in range(n_data):
         # Partition indices into two random subsets
-        maybe_idxs = all_idxs[iter_i : iter_i + 1]
-        test_idxs = list(all_idxs[:iter_i])
-        test_idxs.extend(list(all_idxs[iter_i + 1 :]))
-        test_idxs = np.array(test_idxs, dtype="i8")
+        maybe_idxs = all_idxs[iter_i : iter_i + n_samples]
+        test_idxs = np.concatenate([all_idxs[:iter_i], 
+                                    all_idxs[iter_i + n_samples:]])        
         maybeinliers = data[maybe_idxs, :]
         test_points = data[test_idxs, :]
         maybemodel = model.fit(maybeinliers)
