@@ -42,7 +42,7 @@ from collections import Counter
 from skimage import transform
 
 
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 
 class _MatchTransform:
     def __init__(self, source, target, ttype):
