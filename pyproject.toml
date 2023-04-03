@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "aafitrans"
-version = "0.0.2"
+dynamic = ["version"]
 authors = [
   { name="Prajwel Joseph", email="prajwel.pj@gmail.com" },
 ]
@@ -23,3 +23,6 @@ dependencies = ["numpy",
 [project.urls]
 "Homepage" = "https://github.com/prajwel/aafitrans"
 "Bug Tracker" = "https://github.com/prajwel/aafitrans/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "aafitrans.aafitrans.__version__"}
