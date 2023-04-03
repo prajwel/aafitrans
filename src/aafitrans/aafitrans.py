@@ -371,7 +371,7 @@ def _ransac(data, model, thresh, min_matches, seed = None):
         )
 
     better_fit = good_fit
-    previous_fit = np.ones([3,3])
+    previous_fit = good_fit.params + 1
     for i in range(100):
         test_err = model.get_error(data, better_fit)
         better_inlier_idxs = np.arange(n_data)[test_err < thresh]
