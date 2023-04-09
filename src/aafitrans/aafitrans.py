@@ -166,7 +166,7 @@ def find_transform(source, target,
                    pixel_tolerance=2, 
                    min_matches=10, 
                    num_nearest_neighbors=10,
-                   kdtree_search_radius = 0.001,
+                   kdtree_search_radius = 0.02,
                    n_samples = 1,
                    seed = None):
     """Estimate the transform between ``source`` and ``target``.
@@ -193,9 +193,8 @@ def find_transform(source, target,
             The number of nearest neighbors of a given star (including itself) 
             to construct the triangle invariants.                      
         kdtree_search_radius
-            The default is 0.001. I recommend to keep it 10 times the 
-            (pixel_tolerance / image size). For example, if your tolerance is 2 
-            image size is 1024, keep the value as (10 * 2 / 1024).  
+            The default is 0.02. This radius is used to find nearest neighbours
+            while conducting a KD tree search of invariant features. 
         n_samples
             The minimum number of data points to fit the model to.            
         seed
