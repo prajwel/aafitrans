@@ -42,7 +42,7 @@ from collections import Counter
 from skimage import transform
 
 
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 
 class _MatchTransform:
     def __init__(self, source, target, ttype):
@@ -74,6 +74,13 @@ class _MatchTransform:
         )
         error = resid.max(axis=1)
         return error
+    
+    def get_total_error(self, data, approx_t):
+        d1, d2, d3 = data.shape
+        s, d = data.reshape(d1 * d2, d3).T
+        resid = approx_t.residuals(self.source[s], self.target[d])
+        total_error = np.sqrt(np.sum(np.square(resid)) / (len(resid) * 3))    
+        return total_error       
     
     
 def _invariantfeatures(x1, x2, x3):
@@ -276,6 +283,7 @@ def find_transform(source, target,
                                      pixel_tolerance, 
                                      min_matches, 
                                      n_samples, 
+                                     get_best_fit,
                                      seed)
         
     triangle_inliers = matches[inlier_ind]
@@ -285,6 +293,8 @@ def find_transform(source, target,
     s, t = inl_arr_unique.T
 
     return best_t, (source_controlp[s], target_controlp[t])
+
+
 
 # Copyright (c) 2004-2007, Andrew D. Straw. All rights reserved.
 
@@ -326,11 +336,8 @@ class MaxIterError(RuntimeError):
     pass
 
 
-def _ransac(data, model, thresh, min_matches, n_samples = 1, seed = None):
+def _ransac(data, model, thresh, min_matches, n_samples = 1, get_best_fit = True, seed = None):
     """Fit model parameters to data using the RANSAC algorithm.
-
-    This implementation written from pseudocode found at
-    http://en.wikipedia.org/w/index.php?title=RANSAC&oldid=116358182
 
     Parameters
     ----------
@@ -345,6 +352,8 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, seed = None):
             fits well to data
         n_samples
             The minimum number of data points to fit the model to.
+        get_best_fit
+            Whether to minimise the total error.            
         seed
             Seed value for Numpy Random Generator.     
     Returns
@@ -357,7 +366,9 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, seed = None):
     all_idxs = np.arange(n_data)
     rng = np.random.default_rng(seed)
     rng.shuffle(all_idxs)
-
+    best_error = np.inf
+    improve_error_counter = 0
+    
     for iter_i in range(n_data):
         # Partition indices into two random subsets
         maybe_idxs = all_idxs[iter_i : iter_i + n_samples]
@@ -373,16 +384,25 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, seed = None):
         if len(alsoinliers) >= min_matches:
             good_data = np.concatenate((maybeinliers, alsoinliers))
             good_fit = model.fit(good_data)
-            break
+            total_error = model.get_total_error(good_data, good_fit)
+            if get_best_fit and total_error < best_error:
+                best_error = total_error
+                best_fit = good_fit 
+                improve_error_counter += 1
+                print(improve_error_counter)
+                if improve_error_counter == 100:
+                    break
+            else:
+                best_fit = good_fit
 
-    if good_fit is None:
+    if best_fit is None:
         raise MaxIterError(
             "List of matching triangles exhausted before an acceptable "
             "transformation was found"
         )
 
-    better_fit = good_fit
-    previous_fit = good_fit.params + 1
+    better_fit = best_fit
+    previous_fit = best_fit.params + 1
     for i in range(100):
         test_err = model.get_error(data, better_fit)
         better_inlier_idxs = np.arange(n_data)[test_err < thresh]
@@ -392,6 +412,4 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, seed = None):
             break
         previous_fit = better_fit.params
 
-    best_fit = better_fit
-    best_inlier_idxs = better_inlier_idxs
-    return best_fit, best_inlier_idxs
+    return better_fit, better_inlier_idxs
