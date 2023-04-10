@@ -175,6 +175,7 @@ def find_transform(source, target,
                    num_nearest_neighbors=10,
                    kdtree_search_radius = 0.02,
                    n_samples = 1,
+                   get_best_fit = True,
                    seed = None):
     """Estimate the transform between ``source`` and ``target``.
 
@@ -203,7 +204,9 @@ def find_transform(source, target,
             The default is 0.02. This radius is used to find nearest neighbours
             while conducting a KD tree search of invariant features. 
         n_samples
-            The minimum number of data points to fit the model to.            
+            The minimum number of data points to fit the model to.
+        get_best_fit
+            Whether to minimise the total error.                          
         seed
             Seed value for Numpy Random Generator.       
             
@@ -389,7 +392,6 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, get_best_fit = True
                 best_error = total_error
                 best_fit = good_fit 
                 improve_error_counter += 1
-                print(improve_error_counter)
                 if improve_error_counter == 100:
                     break
             else:
