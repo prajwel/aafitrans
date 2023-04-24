@@ -3,11 +3,13 @@
 Aafitrans is a Python package that provides a modified version of the `find_transform` function from the Astroalign package. The modifications made to the function are as follows:
 
 * The `sep` and `bottleneck` packages are no longer required as dependencies.
-* Offers greater flexibility by supporting all transformations available in the `skimage` library.
-* The `seed` parameter can be set during each run to ensure reproducibility of results.
-* The `kdtree_search_radius` parameter can be set to achieve better and faster matches.
+* Supports all transformations available in the `skimage` library.
+* The `seed` parameter can be set during each run to ensure the reproducibility of results.
+* The `kdtree_search_radius` parameter can be set to achieve faster matches.
+* The RANSAC algorithm was modified so that the obtained solution corresponds to the one with the minimum sum of squared residuals.
 
-I have only made minor modifications to the source code to achieve the above. All credit goes to the original Astroalign authors for developing such amazing software. 
+Please see the original Astroalign software at https://github.com/quatrope/astroalign
+
   
 ## Please cite:
 ```
