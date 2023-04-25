@@ -29,8 +29,8 @@ pip install aafitrans
 It is similar to Astroalign's [`find_transform`](https://astroalign.quatrope.org/en/latest/tutorial.html#finding-the-transformation) function. However, there are many parameters available for the user to modify. 
 ```python
 from aafitrans import find_transform
-transf, (matched_source_xy, matched_target_xy) = find_transform(source_xy, target_xy, 
-															   max_control_points=50,
+transf, (matched_source_xy, matched_target_xy) = find_transform(source_xy, target_xy,
+                                                               max_control_points=50,
                                                                ttype='similarity',
                                                                pixel_tolerance=2,
                                                                min_matches=4,
