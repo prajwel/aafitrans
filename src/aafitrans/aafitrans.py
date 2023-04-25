@@ -204,7 +204,8 @@ def find_transform(source, target,
             The default is 0.02. This radius is used to find nearest neighbours
             while conducting a KD tree search of invariant features. 
         n_samples
-            The minimum number of data points to fit the model to.
+            The minimum number of data points to fit the model to. A value of 1
+            refers to 1 triangle, corresponding to 3 pairs of coordinates. 
         get_best_fit
             Whether to minimise the total error.                          
         seed

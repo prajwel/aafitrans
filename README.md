@@ -30,15 +30,15 @@ It is similar to Astroalign's [`find_transform`](https://astroalign.quatrope.org
 ```python
 from aafitrans import find_transform
 transf, (matched_source_xy, matched_target_xy) = find_transform(source_xy, target_xy,
-                                                               max_control_points=50,
-                                                               ttype='similarity',
-                                                               pixel_tolerance=2,
-                                                               min_matches=4,
-                                                               num_nearest_neighbors=8,
-                                                               kdtree_search_radius=0.02,
-                                                               n_samples=1,
-                                                               get_best_fit=True,
-                                                               seed=None)
+                                                                max_control_points=50,
+                                                                ttype='similarity',
+                                                                pixel_tolerance=2,
+                                                                min_matches=4,
+                                                                num_nearest_neighbors=8,
+                                                                kdtree_search_radius=0.02,
+                                                                n_samples=1,
+                                                                get_best_fit=True,
+                                                                seed=None)
 
 ```
 
@@ -49,13 +49,13 @@ The `find_transform` function estimates the transform between two sets of contro
 ### Parameters:
 - `source`: An iterable of (x, y) coordinates of the source control points.
 - `target`: An iterable of (x, y) coordinates of the target control points.
-- `max_control_points`: The maximum number of control point-sources to find the transformation.
-- `ttype`: The type of Transform to be estimated.
+- `max_control_points`: Default value is 50. The maximum number of control point-sources to find the transformation.
+- `ttype`: Default value is `similarity`. The type of Transform to be estimated. One of the following should be set: {‘euclidean’, similarity’, ‘affine’, ‘piecewise-affine’, ‘projective’, ‘polynomial’}. For details, see [scikit-image documentation](https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.estimate_transform). 
 - `pixel_tolerance`: The maximum residual error for the estimated tranform.            
-- `min_matches`: The minimum number of matches to be found.
+- `min_matches`: The minimum number of matches to be found. A value of 1 refers to 1 triangle, corresponding to 3 pairs of coordinates. 
 - `num_nearest_neighbors`: The number of nearest neighbors of a given star (including itself) to construct the triangle invariants.                      
 - `kdtree_search_radius`: The default is 0.02. This radius is used to find nearest neighbours while conducting a KD tree search of invariant features. 
-- `n_samples`: The minimum number of data points to fit the model to.
+- `n_samples`: The minimum number of data points to fit the model to. A value of 1 refers to 1 triangle, corresponding to 3 pairs of coordinates. 
 - `get_best_fit`: Whether to minimize the total error.                          
 - `seed`: Seed value for Numpy Random Generator.
 
