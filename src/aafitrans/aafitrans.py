@@ -42,7 +42,7 @@ from collections import Counter
 from skimage import transform
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 class _MatchTransform:
     def __init__(self, source, target, ttype):
@@ -398,7 +398,7 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, get_best_fit = True
             else:
                 best_fit = good_fit
 
-    if best_fit is None:
+    if good_fit is None:
         raise MaxIterError(
             "List of matching triangles exhausted before an acceptable "
             "transformation was found"
