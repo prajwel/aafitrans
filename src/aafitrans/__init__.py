@@ -1,1 +1,1 @@
-from .aafitrans import find_transform, __version__
+from .aafitrans import find_transform, __version__, MaxIterError
