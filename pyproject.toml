@@ -26,3 +26,8 @@ dependencies = ["numpy",
 
 [tool.setuptools.dynamic]
 version = {attr = "aafitrans.aafitrans.__version__"}
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
