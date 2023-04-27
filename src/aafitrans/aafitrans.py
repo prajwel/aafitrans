@@ -413,4 +413,3 @@ def _ransac(
         previous_fit = better_fit.params
 
     return better_fit, better_inlier_idxs
-
