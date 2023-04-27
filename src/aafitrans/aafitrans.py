@@ -33,16 +33,14 @@ Beroiz, M., Cabral, J. B., & Sanchez, B.
 Astronomy & Computing, Volume 32, July 2020, 100384.
 '''
 
-
 import numpy as np
 from scipy.spatial import KDTree
 from itertools import combinations
 from functools import partial
 from collections import Counter
 from skimage import transform
-
-
 __version__ = '0.1.1'
+
 
 class _MatchTransform:
     def __init__(self, source, target, ttype):
@@ -74,15 +72,15 @@ class _MatchTransform:
         )
         error = resid.max(axis=1)
         return error
-    
+
     def get_total_error(self, data, approx_t):
         d1, d2, d3 = data.shape
         s, d = data.reshape(d1 * d2, d3).T
         resid = approx_t.residuals(self.source[s], self.target[d])
-        total_error = np.sqrt(np.sum(np.square(resid)) / (len(resid) * 3))    
-        return total_error       
-    
-    
+        total_error = np.sqrt(np.sum(np.square(resid)) / (len(resid) * 3))
+        return total_error
+
+
 def _invariantfeatures(x1, x2, x3):
     """Given 3 points x1, x2, x3, return the invariant features for the set."""
     sides = np.sort(
@@ -92,7 +90,7 @@ def _invariantfeatures(x1, x2, x3):
             np.linalg.norm(x1 - x3),
         ]
     )
-    return [sides[2] / sides[1], sides[1] / sides[0]]    
+    return [sides[2] / sides[1], sides[1] / sides[0]]
 
 
 def _arrangetriplet(sources, vertex_indices):
@@ -132,7 +130,6 @@ def _generate_invariants(sources, num_nearest_neighbors):
     invariant, arranged as described in _arrangetriplet.
     """
 
-
     arrange = partial(_arrangetriplet, sources=sources)
 
     inv = []
@@ -159,7 +156,7 @@ def _generate_invariants(sources, num_nearest_neighbors):
 
     # Remove here all possible duplicate triangles
     uniq_ind = [
-        pos for (pos, elem) in enumerate(inv) if elem not in inv[pos + 1 :]
+        pos for (pos, elem) in enumerate(inv) if elem not in inv[pos + 1:]
     ]
     inv_uniq = np.array(inv)[uniq_ind]
     triang_vrtx_uniq = np.array(triang_vrtx)[uniq_ind]
@@ -167,16 +164,16 @@ def _generate_invariants(sources, num_nearest_neighbors):
     return inv_uniq, triang_vrtx_uniq
 
 
-def find_transform(source, target, 
-                   max_control_points=50, 
-                   ttype='similarity', 
-                   pixel_tolerance=2, 
-                   min_matches=4, 
+def find_transform(source, target,
+                   max_control_points=50,
+                   ttype='similarity',
+                   pixel_tolerance=2,
+                   min_matches=4,
                    num_nearest_neighbors=8,
-                   kdtree_search_radius = 0.02,
-                   n_samples = 1,
-                   get_best_fit = True,
-                   seed = None):
+                   kdtree_search_radius=0.02,
+                   n_samples=1,
+                   get_best_fit=True,
+                   seed=None):
     """Estimate the transform between ``source`` and ``target``.
 
     Return a GeometricTransform object ``T`` that maps pixel x, y indices from
@@ -210,7 +207,7 @@ def find_transform(source, target,
             Whether to minimise the total error.                          
         seed
             Seed value for Numpy Random Generator.       
-            
+
     Returns
     -------
         T, (source_pos_array, target_pos_array)
@@ -226,7 +223,7 @@ def find_transform(source, target,
         MaxIterError
             If no transformation is found.
     """
-    
+
     try:
         source_controlp = np.array(source)[:max_control_points]
         target_controlp = np.array(target)[:max_control_points]
@@ -245,10 +242,12 @@ def find_transform(source, target,
             "minimum value (3)."
         )
 
-    source_invariants, source_asterisms = _generate_invariants(source_controlp, num_nearest_neighbors)
+    source_invariants, source_asterisms = _generate_invariants(
+        source_controlp, num_nearest_neighbors)
     source_invariant_tree = KDTree(source_invariants)
 
-    target_invariants, target_asterisms = _generate_invariants(target_controlp, num_nearest_neighbors)
+    target_invariants, target_asterisms = _generate_invariants(
+        target_controlp, num_nearest_neighbors)
     target_invariant_tree = KDTree(target_invariants)
 
     # r = 0.1 is the maximum search distance, 0.1 is an empirical value that
@@ -282,14 +281,14 @@ def find_transform(source, target,
         best_t = inv_model.fit(matches)
         inlier_ind = np.arange(len(matches))  # All of the indices
     else:
-        best_t, inlier_ind = _ransac(matches, 
-                                     inv_model, 
-                                     pixel_tolerance, 
-                                     min_matches, 
-                                     n_samples, 
+        best_t, inlier_ind = _ransac(matches,
+                                     inv_model,
+                                     pixel_tolerance,
+                                     min_matches,
+                                     n_samples,
                                      get_best_fit,
                                      seed)
-        
+
     triangle_inliers = matches[inlier_ind]
     d1, d2, d3 = triangle_inliers.shape
     inl_arr = triangle_inliers.reshape(d1 * d2, d3)
@@ -297,7 +296,6 @@ def find_transform(source, target,
     s, t = inl_arr_unique.T
 
     return best_t, (source_controlp[s], target_controlp[t])
-
 
 
 # Copyright (c) 2004-2007, Andrew D. Straw. All rights reserved.
@@ -340,7 +338,7 @@ class MaxIterError(RuntimeError):
     pass
 
 
-def _ransac(data, model, thresh, min_matches, n_samples = 1, get_best_fit = True, seed = None):
+def _ransac(data, model, thresh, min_matches, n_samples=1, get_best_fit=True, seed=None):
     """Fit model parameters to data using the RANSAC algorithm.
 
     Parameters
@@ -372,12 +370,12 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, get_best_fit = True
     rng.shuffle(all_idxs)
     best_error = np.inf
     improve_error_counter = 0
-    
+
     for iter_i in range(n_data):
         # Partition indices into two random subsets
-        maybe_idxs = all_idxs[iter_i : iter_i + n_samples]
-        test_idxs = np.concatenate([all_idxs[:iter_i], 
-                                    all_idxs[iter_i + n_samples:]])        
+        maybe_idxs = all_idxs[iter_i: iter_i + n_samples]
+        test_idxs = np.concatenate([all_idxs[:iter_i],
+                                    all_idxs[iter_i + n_samples:]])
         maybeinliers = data[maybe_idxs, :]
         test_points = data[test_idxs, :]
         maybemodel = model.fit(maybeinliers)
@@ -391,7 +389,7 @@ def _ransac(data, model, thresh, min_matches, n_samples = 1, get_best_fit = True
             total_error = model.get_total_error(good_data, good_fit)
             if get_best_fit and total_error < best_error:
                 best_error = total_error
-                best_fit = good_fit 
+                best_fit = good_fit
                 improve_error_counter += 1
                 if improve_error_counter == 100:
                     break
