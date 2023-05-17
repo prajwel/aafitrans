@@ -40,7 +40,12 @@ from functools import partial
 from collections import Counter
 from skimage import transform
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
+
+
+def get_unique_array(array):
+    _, idx = np.unique(array, return_index=True, axis=0)
+    return array[np.sort(idx)]
 
 
 class _MatchTransform:
@@ -220,6 +225,12 @@ def find_transform(
         MaxIterError
             If no transformation is found.
     """
+
+    try:
+        source = get_unique_array(source)
+        target = get_unique_array(target)
+    except Exception:
+        raise TypeError("Input type for source not supported.")
 
     try:
         source_controlp = np.array(source)[:max_control_points]
