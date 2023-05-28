@@ -44,13 +44,13 @@ transf, (matched_source_xy, matched_target_xy) = find_transform(source_xy, targe
 
 ## Documentation for `find_transform` function
 
-The `find_transform` function estimates the transform between two sets of control points, source and target. It returns a GeometricTransform object `T` ([see scikit-image documenation for details](https://scikit-image.org/docs/stable/auto_examples/transform/plot_transform_types.html#sphx-glr-auto-examples-transform-plot-transform-types-py)) that maps pixel x, y indices from the source image s = (x, y) into the target (destination) image t = (x, y). 
+The `find_transform` function estimates the transform between two sets of control points, source and target. It returns a GeometricTransform object `T` ([see scikit-image documentation for details](https://scikit-image.org/docs/stable/auto_examples/transform/plot_transform_types.html#sphx-glr-auto-examples-transform-plot-transform-types-py)) that maps pixel x, y indices from the source image s = (x, y) into the target (destination) image t = (x, y). 
 
 ### Parameters:
 - `source`: An iterable of (x, y) coordinates of the source control points.
 - `target`: An iterable of (x, y) coordinates of the target control points.
-- `max_control_points`: Default value is 50. The maximum number of control point-sources to find the transformation.
-- `ttype`: Default value is `'similarity'`. The type of Transform to be estimated. One of the following should be set: {`'euclidean'`, `'similarity'`, `'affine'`, `'piecewise-affine'`, `'projective'`, `'polynomial'`}. For details, see [scikit-image documentation](https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.estimate_transform). 
+- `max_control_points`: Default value is 50. The maximum number of control points to find the transformation.
+- `ttype`: Default value is `'similarity'`. The type of transform to be estimated. One of the following should be set: {`'euclidean'`, `'similarity'`, `'affine'`, `'piecewise-affine'`, `'projective'`, `'polynomial'`}. For details, see [scikit-image documentation](https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.estimate_transform). 
 - `pixel_tolerance`: The maximum residual error for the estimated tranform.            
 - `min_matches`: The minimum number of matches to be found. A value of 1 refers to 1 triangle, corresponding to 3 pairs of coordinates. 
 - `num_nearest_neighbors`: The number of nearest neighbors of a given star (including itself) to construct the triangle invariants.                      
