@@ -40,7 +40,74 @@ from functools import partial
 from collections import Counter
 from skimage import transform
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
+
+
+# Arun and Horn's method.
+def _arun_and_horn(src, dst, estimate_scale):
+    """Estimate N-D similarity transformation with or without scaling.
+
+    Parameters
+    ----------
+    src : (M, N) array_like
+        Source coordinates.
+    dst : (M, N) array_like
+        Destination coordinates.
+    estimate_scale : bool
+        Whether to estimate scaling factor.
+
+    Returns
+    -------
+    T : (N + 1, N + 1)
+        The homogeneous similarity transformation matrix.
+
+    """
+    src = np.asarray(src)
+    dst = np.asarray(dst)
+
+    num = src.shape[0]
+    dim = src.shape[1]
+
+    # Compute mean of src and dst.
+    src_mean = src.mean(axis=0)
+    dst_mean = dst.mean(axis=0)
+
+    # Subtract mean from src and dst.
+    src_demean = src - src_mean
+    dst_demean = dst - dst_mean
+
+    # Eq. (38).
+    A = dst_demean.T @ src_demean / num
+
+    # Eq. (39).
+    d = np.ones((dim,), dtype=np.float64)
+
+    T = np.eye(dim + 1, dtype=np.float64)
+
+    U, S, V = np.linalg.svd(A)
+
+    # Eq. (40) and (43).
+    rank = np.linalg.matrix_rank(A)
+    if rank == 0:
+        return np.nan * T
+    elif rank == dim - 1:
+        if np.linalg.det(U) * np.linalg.det(V) > 0:
+            T[:dim, :dim] = U @ V
+        else:
+            T[:dim, :dim] = U @ np.diag(d) @ V
+    else:
+        T[:dim, :dim] = U @ np.diag(d) @ V
+
+    if estimate_scale:
+        # Eq. (41) and (42).
+        scale = 1.0 / src_demean.var(axis=0).sum() * (S @ d)
+    else:
+        scale = 1.0
+
+    T[:dim, dim] = dst_mean - scale * (T[:dim, :dim] @ src_mean.T)
+    T[:dim, :dim] *= scale
+
+    return T
 
 
 def get_unique_array(array):
@@ -65,9 +132,20 @@ class _MatchTransform:
         """
         d1, d2, d3 = data.shape
         s, d = data.reshape(d1 * d2, d3).T
-        approx_t = transform.estimate_transform(
-            self.ttype, self.source[s], self.target[d]
-        )
+        if self.ttype == "euclidean":
+            transf_matrix = _arun_and_horn(self.source[s], self.target[d], False)
+            approx_t = transform.EuclideanTransform(
+                matrix=transf_matrix, dimensionality=2
+            )
+        elif self.ttype == "similarity":
+            transf_matrix = _arun_and_horn(self.source[s], self.target[d], True)
+            approx_t = transform.SimilarityTransform(
+                matrix=transf_matrix, dimensionality=2
+            )
+        else:
+            approx_t = transform.estimate_transform(
+                self.ttype, self.source[s], self.target[d]
+            )
         return approx_t
 
     def get_error(self, data, approx_t):

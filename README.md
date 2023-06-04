@@ -1,16 +1,22 @@
 # Aafitrans (AstroAlign FInd TRANSform)
 
-Aafitrans is a Python package that provides a modified version of the `find_transform` function from the Astroalign package. The modifications made to the function are as follows:
+Aafitrans is a Python package that builds upon the capabilities of the Astroalign package's `find_transform` function. It incorporates several modifications to improve its functionality and performance:
 
-* The RANSAC algorithm was modified so that the obtained solution corresponds to the one with the minimum sum of squared residuals.
-* Supports all transformations available in the `skimage` library.
-* The `kdtree_search_radius` parameter can be set to achieve faster matches.
-* The `seed` parameter can be set during each run to ensure the reproducibility of results.
-* The `sep` and `bottleneck` packages are no longer required as dependencies.
+1. Enhanced RANSAC Algorithm: The RANSAC algorithm used in Aafitrans has been optimized to provide a solution that minimizes the sum of squared residuals. This improvement ensures a more accurate transformation estimation.
 
+2. Arun and Horn's Method: Aafitrans replaces Umeyama's method from `scikit-image` with Arun and Horn's method for estimating `'euclidean'` or `'similarity'` transformations. 
+
+3. Reflection Support: Unlike Astroalign, Aafitrans enables the matching of coordinate lists that include reflection along one axis. This enhancement expands the range of transformations that can be accurately estimated.
+
+4. Extended Transformation Options: Aafitrans supports all transformations available in the `scikit-image` library, providing a comprehensive set of options for aligning and transforming images.
+
+5. Improved Matching Efficiency: The `kdtree_search_radius` parameter in Aafitrans allows users to set the search radius for matches, enabling faster and more efficient matching of corresponding points between images.
+
+6. Reproducible Results: Aafitrans introduces the `seed` parameter, which can be set during each run to ensure the reproducibility of results. This feature is particularly useful for research and debugging purposes.
+
+7. Dependency Optimization: Aafitrans eliminates the need for the `sep` and `bottleneck` packages as dependencies, streamlining the installation process and reducing potential compatibility issues.
 
 Please see the original Astroalign software at https://github.com/quatrope/astroalign
-
   
 ## Citation:
 ```
@@ -67,7 +73,3 @@ The `find_transform` function estimates the transform between two sets of contro
 - `TypeError`: If input type of `source` or `target` is not supported.
 - `ValueError`: If it cannot find more than 3 stars on any input.
 - `MaxIterError`: If no transformation is found.
-
-## Caveat
-
-**Reflection/flip**: When using the `find_transform` function with the `ttype` parameter set to `'euclidean'` or `'similarity'`, it is important to note that if the correct transform between the source and target lists involves a reflection (flip), the function may fail or produce unexpected results. This behaviour is caused by the Umeyama algorithm (Umeyama, 1991) from `scikit-image` utilised for estimating `'euclidean'` or `'similarity'` transformations. The algorithm deliberately avoids solutions that require reflection.

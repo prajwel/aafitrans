@@ -54,6 +54,14 @@ test_coo2 = np.array(
     ]
 )
 
+expected_result = np.array(
+    [
+        [-9.44682863e-01, -3.48389869e-01, 1.81624418e03],
+        [3.48389869e-01, -9.44682863e-01, 9.09886211e02],
+        [0, 0, 1],
+    ]
+)
+
 
 def test_MaxIterError():
     with pytest.raises(MaxIterError):
@@ -63,12 +71,16 @@ def test_MaxIterError():
 
 
 def test_matching():
-    expected_result = np.array(
-        [
-            [-9.44682863e-01, -3.48389869e-01, 1.81624418e03],
-            [3.48389869e-01, -9.44682863e-01, 9.09886211e02],
-            [0, 0, 1],
-        ]
-    )
     transf, _ = find_transform(test_coo1, test_coo2, min_matches=10, pixel_tolerance=10)
     np.testing.assert_allclose(transf.params, expected_result)
+
+
+def test_flipped_matching():
+    expected_flipped_result = expected_result.copy()
+    expected_flipped_result[0, :] = expected_result[0, :] * -1
+    test_coo2_flipped = test_coo2.copy()
+    test_coo2_flipped[:, 0] = test_coo2_flipped[:, 0] * -1
+    transf, _ = find_transform(
+        test_coo1, test_coo2_flipped, min_matches=10, pixel_tolerance=10
+    )
+    np.testing.assert_allclose(transf.params, expected_flipped_result)
