@@ -9,6 +9,7 @@ Aafitrans is a Python package that builds upon the capabilities of the Astroalig
 3. Reflection Support: Unlike Astroalign, Aafitrans enables the matching of coordinate lists that include reflection along one axis. This enhancement expands the range of transformations that can be accurately estimated.
 
 4. Extended Transformation Options: Aafitrans supports all transformations available in the `scikit-image` library, providing a comprehensive set of options for aligning and transforming images.
+> Note: only `'euclidean'`, `'similarity'`, and `'affine'` transformations have been tested.
 
 5. Improved Matching Efficiency: The `kdtree_search_radius` parameter in Aafitrans allows users to set the search radius for matches, enabling faster and more efficient matching of corresponding points between images.
 
