@@ -40,7 +40,7 @@ from functools import partial
 from collections import Counter
 from skimage import transform
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 
 # Arun and Horn's method.
@@ -304,26 +304,31 @@ def find_transform(
             If no transformation is found.
     """
 
+    if np.array(source).shape[1] != 2 or np.array(target).shape[1] != 2:
+        raise ValueError(
+            "The source and target coordinate lists must have two columns."
+        )
+
     try:
         source = get_unique_array(source)
         target = get_unique_array(target)
     except Exception:
-        raise TypeError("Input type for source not supported.")
+        raise TypeError("Input type for source or target not supported.")
 
     try:
         source_controlp = np.array(source)[:max_control_points]
         target_controlp = np.array(target)[:max_control_points]
     except Exception:
-        raise TypeError("Input type for source not supported.")
+        raise TypeError("Input type for source or target not supported.")
 
     # Check for low number of reference points
     if len(source_controlp) < 3:
         raise ValueError(
-            "Reference stars in source image are less than the " "minimum value (3)."
+            "Reference stars in source image are less than the minimum value (3)."
         )
     if len(target_controlp) < 3:
         raise ValueError(
-            "Reference stars in target image are less than the " "minimum value (3)."
+            "Reference stars in target image are less than the minimum value (3)."
         )
 
     source_invariants, source_asterisms = _generate_invariants(
@@ -486,8 +491,7 @@ def _ransac(
 
     if good_fit is None:
         raise MaxIterError(
-            "List of matching triangles exhausted before an acceptable "
-            "transformation was found"
+            "List of matching triangles exhausted before an acceptable transformation was found"
         )
 
     better_fit = best_fit

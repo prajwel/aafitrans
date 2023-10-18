@@ -49,6 +49,9 @@ transf, (matched_source_xy, matched_target_xy) = find_transform(source_xy, targe
 
 ```
 
+
+**WARNING:** The Astroalign [`find_transform`](https://astroalign.quatrope.org/en/latest/tutorial.html#finding-the-transformation)  function takes both coordinate lists and images as input, while the Aafitrans `find_transform` function only takes coordinate lists as input.
+
 ## Documentation for `find_transform` function
 
 The `find_transform` function estimates the transform between two sets of control points, source and target. It returns a GeometricTransform object `T` ([see scikit-image documentation for details](https://scikit-image.org/docs/stable/auto_examples/transform/plot_transform_types.html#sphx-glr-auto-examples-transform-plot-transform-types-py)) that maps pixel x, y indices from the source image s = (x, y) into the target (destination) image t = (x, y). 
