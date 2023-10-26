@@ -1,5 +1,7 @@
 # Aafitrans (AstroAlign FInd TRANSform)
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10041152.svg)](https://doi.org/10.5281/zenodo.10041152)
+
 Aafitrans is a Python package that builds upon the capabilities of the Astroalign package's `find_transform` function. It incorporates several modifications to improve its functionality and performance:
 
 1. Enhanced RANSAC Algorithm: The RANSAC algorithm used in Aafitrans has been optimized to provide a solution that minimizes the sum of squared residuals. This improvement ensures a more accurate transformation estimation.
@@ -19,7 +21,12 @@ Aafitrans is a Python package that builds upon the capabilities of the Astroalig
 
 Please see the original Astroalign software at https://github.com/quatrope/astroalign
   
-## Citation:
+## Citations:
+Please cite both Aafitrans Python package and the Astroalign article.
+
+Aafitrans can be cited using Zenodo. Please see the link: https://doi.org/10.5281/zenodo.10041151
+
+Astroalign citation is provided below.
 ```
 Astroalign: A Python module for astronomical image registration.
 Beroiz, M., Cabral, J. B., & Sanchez, B.
