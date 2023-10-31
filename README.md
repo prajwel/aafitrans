@@ -22,16 +22,16 @@ Aafitrans is a Python package that builds upon the capabilities of the Astroalig
 Please see the original Astroalign software at https://github.com/quatrope/astroalign
   
 ## Citations:
-Please cite both Aafitrans Python package and the Astroalign article.
+Please cite both Aafitrans Python package and the [Astroalign article](https://doi.org/10.1016/j.ascom.2020.100384):
 
-Aafitrans can be cited using Zenodo. Please see the link: https://doi.org/10.5281/zenodo.10041151
+* Aafitrans can be cited using Zenodo. Please see the link: https://doi.org/10.5281/zenodo.10041151
 
-Astroalign citation is provided below.
-```
-Astroalign: A Python module for astronomical image registration.
-Beroiz, M., Cabral, J. B., & Sanchez, B.
-Astronomy & Computing, Volume 32, July 2020, 100384.
-```
+* [Astroalign article](https://doi.org/10.1016/j.ascom.2020.100384) citation is provided below.
+	```
+	Astroalign: A Python module for astronomical image registration.
+	Beroiz, M., Cabral, J. B., & Sanchez, B.
+	Astronomy & Computing, Volume 32, July 2020, 100384.
+	```
 
 
 ## Installation
