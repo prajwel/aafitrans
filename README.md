@@ -1,4 +1,5 @@
 # Aafitrans (AstroAlign FInd TRANSform)
+> Match coordinate lists.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10041152.svg)](https://doi.org/10.5281/zenodo.10041152)
 
