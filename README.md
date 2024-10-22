@@ -2,6 +2,7 @@
 > Match coordinate lists.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10041152.svg)](https://doi.org/10.5281/zenodo.10041152)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/aafitrans)
 
 Aafitrans is a Python package that builds upon the capabilities of the Astroalign package's `find_transform` function. It incorporates several modifications to improve its functionality and performance:
 
